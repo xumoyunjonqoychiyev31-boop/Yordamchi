@@ -49,6 +49,14 @@ h1{font-size:14px;font-weight:700;letter-spacing:.38em;text-transform:uppercase;
 #av{animation:fl 3.6s ease-in-out infinite}
 @keyframes fl{50%{transform:translateY(-4px)}}
 @media (prefers-reduced-motion:reduce){#av,.eye{animation:none}}
+#ch{display:block;margin-top:12px;color:var(--mut);font-size:13px}
+#ch[hidden]{display:none}
+#win{position:fixed;left:8px;right:8px;bottom:calc(128px + env(safe-area-inset-bottom));height:min(44vh,360px);display:flex;flex-direction:column;background:#000;border:1px solid var(--gold);border-radius:16px;overflow:hidden;z-index:4;box-shadow:0 12px 40px rgba(0,0,0,.65)}
+#win[hidden]{display:none}
+.wh{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:var(--card);font-size:13px;color:var(--gold)}
+#wt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:68%}
+.wh a,.wh button{color:var(--ink);background:none;border:0;font-size:16px;margin-left:12px;text-decoration:none}
+#fr{flex:1;border:0;width:100%;background:#000}
 </style>
 </head>
 <body>
@@ -67,9 +75,12 @@ h1{font-size:14px;font-weight:700;letter-spacing:.38em;text-transform:uppercase;
  <ellipse cx="52" cy="112" rx="6.5" ry="10" fill="#e9b88f"/><ellipse cx="148" cy="112" rx="6.5" ry="10" fill="#e9b88f"/>
  <circle cx="100" cy="105" r="48" fill="#f1c7a0"/>
  <path d="M53 92Q50 50 100 50Q150 50 147 92Q140 80 100 80Q60 80 53 92Z" fill="#2b2118"/>
- <path d="M58 86L64 58Q100 44 136 58L142 86Q100 76 58 86Z" fill="#14181d" stroke="#f5d98a" stroke-opacity=".7" stroke-width="1.2"/>
- <path d="M60 80Q100 70 140 80" stroke="#f5d98a" stroke-width="2.5" fill="none" stroke-dasharray="1 5" stroke-linecap="round"/>
- <path d="M100 55l7 9-7 9-7-9z" fill="none" stroke="#f5d98a" stroke-width="2"/>
+ <g id="dp"><path d="M54 88L62 54Q100 40 138 54L146 88Q100 79 54 88Z" fill="#101216"/>
+ <path d="M54 88Q100 79 146 88M62 54Q100 40 138 54" stroke="#f8f4e8" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+ <path d="M100 52Q114 60 108 74Q104 79 98 75Q106 66 100 52Z" fill="#f8f4e8"/>
+ <path d="M70 62Q80 66 78 76Q75 79 71 75Q76 70 70 62Z" fill="#f8f4e8"/>
+ <path d="M130 62Q120 66 122 76Q125 79 129 75Q124 70 130 62Z" fill="#f8f4e8"/>
+ <circle cx="88" cy="70" r="1.8" fill="#f8f4e8"/><circle cx="112" cy="70" r="1.8" fill="#f8f4e8"/><circle cx="100" cy="82" r="1.8" fill="#f8f4e8"/></g>
  <ellipse class="eye" cx="82" cy="110" rx="5" ry="6.5" fill="#1b1b1b"/>
  <ellipse class="eye" cx="118" cy="110" rx="5" ry="6.5" fill="#1b1b1b"/>
  <path d="M71 99Q81 94 93 97M107 97Q119 94 129 99" stroke="#2b2118" stroke-width="4.5" fill="none" stroke-linecap="round"/>
@@ -81,82 +92,125 @@ h1{font-size:14px;font-weight:700;letter-spacing:.38em;text-transform:uppercase;
 
 <div id="log" aria-live="polite"></div>
 <form id="f"><input id="q" placeholder="Savolingizni yozing…" autocomplete="off"><button type="button" id="mic" title="Ovoz bilan gapirish">🎤</button><button type="submit" title="Yuborish">➤</button></form>
-<div id="chips"><button data-c="Musiqa qo‘y"><span>🎵</span>Musiqa</button><button data-c="Musiqani o‘chir"><span>⏹️</span>To‘xtat</button><button data-c="Soat nechchi?"><span>🕘</span>Soat</button><button data-c="YouTube’ni och"><span>▶️</span>YouTube</button><button data-c="Telegram’ni och"><span>✈️</span>Telegram</button></div>
+<div id="chips"><button data-c="Musiqa qo‘y"><span>🎵</span>Musiqa</button><button data-c="Musiqani o‘chir"><span>⏹️</span>To‘xtat</button><button data-c="Ob-havo qanday?"><span>🌤️</span>Ob-havo</button><button data-c="Dollar kursi"><span>💵</span>Kurs</button><button data-c="YouTube’ni och"><span>▶️</span>YouTube</button></div>
 
-<div id="ov"><div class="c"><p>Assalomu alaykum!</p><div>Ismingiz nima?</div><input id="nm" placeholder="Ismingizni yozing" autocomplete="given-name" maxlength="30"><button id="go">Boshlash</button></div></div>
+<div id="win" hidden><div class="wh"><span id="wt"></span><span><a id="wx" target="_blank" rel="noopener" title="Alohida ochish">↗</a><button id="wc" title="Yopish">✕</button></span></div><iframe id="fr" title="Oyna" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+
+<div id="ov"><div class="c"><p id="ot">Assalomu alaykum!</p><div id="os">Ismingiz nima?</div><input id="nm" placeholder="Ismingizni yozing" autocomplete="given-name" maxlength="30"><button id="go">Boshlash</button><a id="ch" href="#" hidden>Ismni o‘zgartirish</a></div></div>
 
 <script>
 (()=>{
 const $=s=>document.querySelector(s),log=$("#log"),av=$("#av"),TTS=window.speechSynthesis;
-// Savollarga javob beradigan manzil. Barqaror ishlashi uchun o‘z proxy manzilingizga almashtiring (API kalitni bu yerga yozmang).
+// Ixtiyoriy: YouTube Data API kaliti (HTTP referrer bilan cheklang). Bo‘sh bo‘lsa, ochiq qidiruv serverlari sinab ko‘riladi.
+const YT_KEY="";
+// Savollarga javob manzili. Barqarorlik uchun o‘z proxy manzilingizga almashtiring (API kalitni bu yerga yozmang).
 const AI_URL="https://text.pollinations.ai/openai";
-// Musiqa: mp3 fayllarni repodagi music/ papkasiga qo‘ying va shu yerga yozing. Masalan: [{n:"Qo‘shiq nomi",src:"music/1.mp3"}]
-const TRACKS=[];
-const SYS="Sen o‘zbek tilidagi do‘stona yordamchisan. Faqat sof o‘zbek tilida (lotin yozuvida) javob ber, rus va ingliz so‘zlarini aralashtirma. Javob qisqa va aniq bo‘lsin (2–4 gap).";
-const APPS={youtube:["YouTube","https://www.youtube.com"],telegram:["Telegram","https://web.telegram.org/a/"],instagram:["Instagram","https://www.instagram.com"],facebook:["Facebook","https://www.facebook.com"],whatsapp:["WhatsApp","https://web.whatsapp.com"],tiktok:["TikTok","https://www.tiktok.com"],gmail:["Gmail","https://mail.google.com"],pochta:["Gmail","https://mail.google.com"],xarita:["Xaritalar","https://maps.google.com"],google:["Google","https://www.google.com"],github:["GitHub","https://github.com"],vikipediya:["Vikipediya","https://uz.wikipedia.org"]};
-const MO=["yanvar","fevral","mart","aprel","may","iyun","iyul","avgust","sentabr","oktabr","noyabr","dekabr"];
-const WD=["yakshanba","dushanba","seshanba","chorshanba","payshanba","juma","shanba"];
-let who="",muted=false,hist=[],voice=null,ac,mt,au,playing=false,ti=0;
+const SYS="Ты — дружелюбный голосовой помощник, мальчик. Пользователь пишет по-узбекски (латиницей) или по-русски — ты понимаешь всё. Всегда отвечай только по-русски, коротко (2–4 предложения), простыми словами, без markdown и списков.";
+const APPS={telegram:["Telegram","https://web.telegram.org/a/"],instagram:["Instagram","https://www.instagram.com"],facebook:["Facebook","https://www.facebook.com"],whatsapp:["WhatsApp","https://web.whatsapp.com"],tiktok:["TikTok","https://www.tiktok.com"],gmail:["Gmail","https://mail.google.com"],pochta:["Gmail","https://mail.google.com"],google:["Google","https://www.google.com"],github:["GitHub","https://github.com"]};
+const CITIES={toshkent:"Tashkent",samarqand:"Samarkand",buxoro:"Bukhara",namangan:"Namangan",andijon:"Andijan",fargona:"Fergana",nukus:"Nukus",qarshi:"Karshi",termiz:"Termez",urganch:"Urgench",jizzax:"Jizzakh",guliston:"Gulistan",navoiy:"Navoi",qoqon:"Kokand",xiva:"Khiva",moskva:"Moscow"};
+const MO=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+const WD=["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
+const TR={a:"а",b:"б",d:"д",e:"е",f:"ф",g:"г",h:"х",i:"и",j:"дж",k:"к",l:"л",m:"м",n:"н",o:"о",p:"п",q:"к",r:"р",s:"с",t:"т",u:"у",v:"в",x:"х",y:"й",z:"з"};
+const cyr=s=>/[а-яё]/i.test(s)?s:s.toLowerCase().replace(/sh/g,"ш").replace(/ch/g,"ч").replace(/yo/g,"ё").replace(/yu/g,"ю").replace(/ya/g,"я").replace(/o[‘’ʻʼ'`]/g,"у").replace(/g[‘’ʻʼ'`]/g,"г").replace(/[a-z]/g,c=>TR[c]).replace(/(^|[\s-])\S/g,c=>c.toUpperCase());
+let who="",muted=false,hist=[],voice=null,ac,mt,au,playing=false;
+const ck=()=>(document.cookie.match(/(?:^|; )ism=([^;]*)/)||[])[1];
 try{who=localStorage.getItem("ism")||""}catch(e){}
-const save=()=>{try{localStorage.setItem("ism",who)}catch(e){}};
+if(!who&&ck())who=decodeURIComponent(ck());
+const save=()=>{try{localStorage.setItem("ism",who)}catch(e){}document.cookie="ism="+encodeURIComponent(who)+";max-age=31536000;path=/;SameSite=Lax"};
 const norm=s=>s.toLowerCase().replace(/[‘’ʻʼ'`]/g,"").trim();
+const rn=()=>cyr(who||"друг");
 
-function add(role,text,link){
-  const d=document.createElement("div");d.className="m "+(role==="u"?"u":"b");d.textContent=text;
-  if(link){const a=document.createElement("a");a.href=link;a.target="_blank";a.rel="noopener";a.textContent="Ochish ↗";d.append(a)}
-  log.append(d);log.scrollTop=log.scrollHeight;
-}
+function fill(d,text,link){d.textContent=text;if(link){const a=document.createElement("a");a.href=link;a.target="_blank";a.rel="noopener";a.textContent="Ochish ↗";d.append(a)}log.scrollTop=log.scrollHeight}
+function add(role,text,link){const d=document.createElement("div");d.className="m "+(role==="u"?"u":"b");log.append(d);fill(d,text,link);return d}
 const talk=on=>av.classList.toggle("talk",on);
-function pick(){const v=TTS.getVoices();voice=v.find(x=>/^uz/i.test(x.lang))||v.find(x=>/^tr/i.test(x.lang))||null}
+function pick(){const v=TTS.getVoices();voice=v.find(x=>/^ru/i.test(x.lang))||null}
 if(TTS){pick();TTS.onvoiceschanged=pick}
 function speak(t){
   if(TTS)TTS.cancel();
   if(muted||!TTS){talk(true);setTimeout(()=>talk(false),Math.min(t.length*55,5000));return}
-  const uz=voice&&/^uz/i.test(voice.lang);
-  const u=new SpeechSynthesisUtterance(t.replace(/[*#`_>]/g,"").replace(/[‘’ʻʼ]/g,uz?"'":""));
-  u.lang=voice?voice.lang:"uz-UZ";if(voice)u.voice=voice;u.rate=.95;u.pitch=.7;
+  const u=new SpeechSynthesisUtterance(t.replace(/[*#`_>]/g,""));
+  u.lang="ru-RU";if(voice)u.voice=voice;u.rate=1;u.pitch=.75;
   u.onstart=()=>talk(true);u.onend=u.onerror=()=>talk(false);
   TTS.speak(u);
 }
 
+const AC=()=>{ac=ac||new(window.AudioContext||window.webkitAudioContext)();ac.resume();return ac};
 function stopMusic(){playing=false;clearTimeout(mt);if(au){au.pause();au=null}}
-function playMusic(){
-  stopMusic();playing=true;
-  if(TRACKS.length){const t=TRACKS[ti++%TRACKS.length];au=new Audio(t.src);au.onended=playMusic;au.play().catch(()=>{});return "Musiqa yoqildi: "+t.n}
-  ac=ac||new(window.AudioContext||window.webkitAudioContext)();ac.resume();
-  const sc=[261.6,293.7,329.6,392,440,523.3,587.3];
+function melody(){
+  stopMusic();playing=true;const a=AC(),sc=[261.6,293.7,329.6,392,440,523.3,587.3];
   (function tick(){
     if(!playing)return;
-    const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;
+    const o=a.createOscillator(),g=a.createGain(),n=a.currentTime;
     o.frequency.value=sc[Math.random()*sc.length|0]*(Math.random()<.25?.5:1);
     g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(.16,n+.05);g.gain.exponentialRampToValueAtTime(.001,n+1.8);
-    o.connect(g).connect(ac.destination);o.start(n);o.stop(n+1.9);
+    o.connect(g).connect(a.destination);o.start(n);o.stop(n+1.9);
     mt=setTimeout(tick,450+Math.random()*500);
   })();
-  return "Yoqimli kuy yoqildi. To‘xtatish uchun “musiqani o‘chir” deb yozing.";
+}
+function beep(){const a=AC();[0,.35,.7].forEach(d=>{const o=a.createOscillator(),g=a.createGain(),n=a.currentTime+d;o.frequency.value=880;g.gain.setValueAtTime(.25,n);g.gain.exponentialRampToValueAtTime(.001,n+.3);o.connect(g).connect(a.destination);o.start(n);o.stop(n+.3)})}
+
+// Sayt ichidagi qalqib chiquvchi oyna
+const win=$("#win"),fr=$("#fr");
+function openWin(title,src,ext){fr.src=src;$("#wt").textContent=title;$("#wx").href=ext||src;win.hidden=false}
+function closeWin(){fr.src="about:blank";win.hidden=true}
+$("#wc").onclick=closeWin;
+
+async function getJ(u){const c=new AbortController(),to=setTimeout(()=>c.abort(),6000);try{return await(await fetch(u,{signal:c.signal})).json()}finally{clearTimeout(to)}}
+async function ytId(q){
+  const e=encodeURIComponent(q);
+  if(YT_KEY){try{return(await getJ("https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q="+e+"&key="+YT_KEY)).items[0].id.videoId}catch(x){}}
+  for(const h of ["https://pipedapi.kavin.rocks","https://api.piped.private.coffee","https://pipedapi.adminforge.de"]){try{return(await getJ(h+"/search?filter=videos&q="+e)).items[0].url.split("v=")[1]}catch(x){}}
+  for(const h of ["https://yewtu.be","https://inv.nadeko.net"]){try{return(await getJ(h+"/api/v1/search?type=video&q="+e))[0].videoId}catch(x){}}
+  return null;
+}
+async function playYT(q,label){
+  const id=await ytId(q);
+  if(!id)return{t:"Не удалось найти видео внутри сайта. Откройте поиск по ссылке.",url:"https://www.youtube.com/results?search_query="+encodeURIComponent(q),fail:1};
+  openWin(label||q,"https://www.youtube-nocookie.com/embed/"+id+"?autoplay=1&playsinline=1","https://www.youtube.com/watch?v="+id);
+  return{t:"Включаю видео в окне на сайте. Назовите песню — включу другую."};
+}
+const WMO=c=>c===0?"ясно":c<4?"переменная облачность":c<50?"туман":c<60?"морось":c<70?"дождь":c<80?"снег":c<85?"ливень":c<95?"снегопад":"гроза";
+async function weather(city){
+  const g=(await getJ("https://geocoding-api.open-meteo.com/v1/search?count=1&language=ru&name="+city)).results;
+  if(!g)return{t:"Не нашёл такой город."};
+  const w=(await getJ("https://api.open-meteo.com/v1/forecast?latitude="+g[0].latitude+"&longitude="+g[0].longitude+"&current=temperature_2m,weather_code,wind_speed_10m")).current;
+  return{t:g[0].name+": сейчас "+Math.round(w.temperature_2m)+" градусов, "+WMO(w.weather_code)+", ветер "+Math.round(w.wind_speed_10m)+" км/ч."};
+}
+async function rates(){
+  const r=(await getJ("https://open.er-api.com/v6/latest/USD")).rates,f=n=>Math.round(n).toLocaleString("ru-RU");
+  return{t:"Курс: 1 доллар — "+f(r.UZS)+" сумов, 1 евро — "+f(r.UZS/r.EUR)+" сумов, 1 рубль — "+f(r.UZS/r.RUB)+" сумов."};
 }
 
-function launch([n,u]){
-  if(u.startsWith("tel:"))setTimeout(()=>{location.href=u},400);else window.open(u,"_blank","noopener");
-  return{t:n+" ochilmoqda…",url:u};
-}
 function cmd(raw){
   const t=norm(raw),has=r=>r.test(t),words=t.split(/\s+/);let m;
-  if(has(/ismim nima|ismimni ayt/))return{t:who?"Sizning ismingiz — "+who+".":"Ismingizni hali bilmayman. “Ismim ...” deb yozing."};
-  if(m=t.match(/^(?:mening )?ismim\s+(.+)$/)||t.match(/^meni\s+(.+?)\s+deb chaqir/)){who=m[1].replace(/(^|\s)\S/g,c=>c.toUpperCase());save();return{t:"Xo‘p, "+who+"! Endi sizni shunday chaqiraman."}}
-  if(has(/^(salom|assalom)/))return{t:"Va alaykum assalom, "+(who||"do‘stim")+"! Qanday yordam bera olaman?"};
-  if(has(/soat|vaqt/)&&has(/nech|qancha|nima|hozir/)){const d=new Date(),p=n=>String(n).padStart(2,"0");return{t:"Hozir soat "+p(d.getHours())+":"+p(d.getMinutes())+"."}}
-  if(has(/sana|nechanchi (kun|sana)|qaysi kun|hafta kuni/)){const d=new Date();return{t:"Bugun "+d.getDate()+"-"+MO[d.getMonth()]+", "+d.getFullYear()+"-yil, "+WD[d.getDay()]+"."}}
-  if(has(/ochir|toxtat|jim bol|stop/)&&has(/musiqa|kuy|qoshiq|qoshig|ovoz|gapirma|stop|jim/)){stopMusic();if(TTS)TTS.cancel();return{t:"Xo‘p, to‘xtatdim."}}
-  const app=Object.keys(APPS).find(k=>t.includes(k));
-  if(app&&words.length<=5&&has(/\b(och|ochib|oching|kir|kirib|ishga)\b/))return launch(APPS[app]);
-  if(has(/musiqa|kuy|qoshiq|qoshig/)&&has(/\b(qoy\w*|yoq\w*|chal\w*|eshit\w*)/)){
-    const G=/^(musiqa\w*|kuy\w*|qoshiq\w*|qoshig\w*|qoy\w*|yoq\w*|chal\w*|eshit\w*|bitta|menga|iltimos|bir|biror|yaxshi)$/;
-    const q=raw.split(/\s+/).filter(w=>!G.test(norm(w).replace(/[?!.,]/g,""))).join(" ");
-    return q?launch(["“"+q+"” YouTube’da","https://www.youtube.com/results?search_query="+encodeURIComponent(q)]):{t:playMusic()};
+  const yt=raw.match(/(?:youtu\.be\/|[?&]v=|embed\/)([\w-]{11})/);
+  if(yt){openWin("YouTube","https://www.youtube-nocookie.com/embed/"+yt[1]+"?autoplay=1&playsinline=1","https://www.youtube.com/watch?v="+yt[1]);return{t:"Включаю видео в окне на сайте."}}
+  if(has(/ismim nima|ismimni ayt/))return{t:who?"Вас зовут "+rn()+".":"Я пока не знаю вашего имени. Напишите: «Ismim ...»."};
+  if(m=t.match(/^(?:mening )?ismim\s+(.+)$/)||t.match(/^meni\s+(.+?)\s+deb chaqir/)){who=m[1].replace(/(^|\s)\S/g,c=>c.toUpperCase());save();return{t:"Хорошо, "+rn()+"! Буду так вас называть."}}
+  if(has(/^(salom|assalom|привет|здравствуй)/))return{t:"Здравствуйте, "+rn()+"! Чем могу помочь?"};
+  if(has(/ochir|toxtat|jim bol|stop|\byop/)&&has(/musiqa|kuy|qoshiq|qoshig|ovoz|gapirma|stop|jim|oyna|video|\byop/)){stopMusic();closeWin();if(TTS)TTS.cancel();return{t:"Хорошо, остановил."}}
+  const ex=raw.replace(/[x×]/gi,"*").replace(/[÷:]/g,"/").replace(/,/g,".");
+  if(/^[\d\s+\-*/().%]+$/.test(ex)&&/\d\s*[+\-*/%]\s*\d/.test(ex)){try{const v=Function("return("+ex+")")();if(isFinite(v))return{t:ex.trim()+" = "+(+v.toFixed(6))}}catch(e){}}
+  if(has(/taymer|budilnik|eslat/)&&(m=t.match(/(\d+)\s*(soniya|sekund|daqiqa|minut|soat)/))){
+    const n=+m[1],s=/^(son|sek)/.test(m[2]),d=/^(daq|min)/.test(m[2]),ms=n*(s?1e3:d?6e4:36e5),u=s?"сек.":d?"мин.":"ч.";
+    setTimeout(()=>{const x="Время вышло! Таймер на "+n+" "+u+" сработал.";add("b",x);beep();speak(x)},ms);
+    return{t:"Таймер на "+n+" "+u+" запущен."};
   }
-  if(m=t.match(/(?:qongiroq|telefon)[^\d+]*(\+?\d[\d\s-]{6,})/))return launch(["Qo‘ng‘iroq","tel:"+m[1].replace(/[\s-]/g,"")]);
-  if(/^(qidir|izla|google)\b/.test(t)||/\b(qidirib ber|izlab ber)$/.test(t)){const q=raw.replace(/qidirib ber|izlab ber|qidir|izla|google/gi,"").trim();if(q)return launch(["Google qidiruvi","https://www.google.com/search?q="+encodeURIComponent(q)])}
+  if(has(/soat|vaqt/)&&has(/nech|qancha|nima|hozir/)){const d=new Date(),p=n=>String(n).padStart(2,"0");return{t:"Сейчас "+p(d.getHours())+":"+p(d.getMinutes())+"."}}
+  if(has(/sana|nechanchi (kun|sana)|qaysi kun|hafta kuni/)){const d=new Date();return{t:"Сегодня "+d.getDate()+" "+MO[d.getMonth()]+" "+d.getFullYear()+" года, "+WD[d.getDay()]+"."}}
+  if(has(/ob.?havo|harorat|yomgir/))return weather(CITIES[Object.keys(CITIES).find(k=>t.includes(k))||"toshkent"]);
+  if(has(/kurs|dollar|valyuta|yevro|\busd\b/))return rates();
+  if(has(/xarita/)){const q=raw.split(/\s+/).filter(w=>!/^(xarita\w*|och\w*|ko.?rsat\w*|menga|iltimos)$/i.test(norm(w))).join(" ")||"Tashkent",e=encodeURIComponent(q);openWin("Xarita: "+q,"https://www.google.com/maps?q="+e+"&output=embed","https://www.google.com/maps?q="+e);return{t:"Показываю карту в окне на сайте."}}
+  if(has(/musiqa|kuy|qoshiq|qoshig|музык|песн/)&&has(/\b(qoy\w*|yoq\w*|chal\w*|eshit\w*|включ\w*)/)){
+    const G=/^(musiqa\w*|kuy\w*|qoshiq\w*|qoshig\w*|qoy\w*|yoq\w*|chal\w*|eshit\w*|bitta|menga|iltimos|bir|biror|yaxshi|музык\w*|песн\w*|включ\w*)$/;
+    const q=raw.split(/\s+/).filter(w=>!G.test(norm(w).replace(/[?!.,]/g,""))).join(" ");
+    return playYT(q||"o‘zbek qo‘shiqlari 2026 eng yaxshi",q?"":"Musiqa").then(r=>{if(r.fail&&!q){melody();return{t:"Музыка из интернета недоступна, включил встроенную мелодию."}}return r});
+  }
+  const op=has(/\b(och|ochib|oching|kir|kirib|ishga)\b/)&&words.length<=5;
+  if(op&&t.includes("youtube"))return playYT("o‘zbek qo‘shiqlari 2026","YouTube");
+  const app=Object.keys(APPS).find(k=>t.includes(k));
+  if(op&&app){const[n,u]=APPS[app];return{t:n+" нельзя показать внутри сайта — приложение запрещает встраивание. Нажмите «Ochish», чтобы открыть отдельно.",url:u}}
+  if(m=t.match(/(?:qongiroq|telefon)[^\d+]*(\+?\d[\d\s-]{6,})/)){const u="tel:"+m[1].replace(/[\s-]/g,"");setTimeout(()=>{location.href=u},400);return{t:"Звоню по этому номеру.",url:u}}
   return null;
 }
 
@@ -164,19 +218,20 @@ async function ask(q){
   hist.push({role:"user",content:q});hist=hist.slice(-8);
   const c=new AbortController(),to=setTimeout(()=>c.abort(),25000);
   try{
-    const r=await fetch(AI_URL,{method:"POST",headers:{"Content-Type":"application/json"},signal:c.signal,body:JSON.stringify({model:"openai",messages:[{role:"system",content:SYS+(who?" Foydalanuvchining ismi: "+who+".":"")},...hist]})});
+    const r=await fetch(AI_URL,{method:"POST",headers:{"Content-Type":"application/json"},signal:c.signal,body:JSON.stringify({model:"openai",messages:[{role:"system",content:SYS+(who?" Имя пользователя: "+rn()+".":"")},...hist]})});
     const a=(await r.json()).choices[0].message.content.trim();
     hist.push({role:"assistant",content:a});return a;
-  }catch(e){return "Kechirasiz, hozir javob ola olmadim. Internetni tekshirib, qaytadan urinib ko‘ring."}
+  }catch(e){return "Извините, сейчас не получилось ответить. Проверьте интернет и попробуйте ещё раз."}
   finally{clearTimeout(to)}
 }
 async function send(raw){
   raw=raw.trim();if(!raw)return;
   add("u",raw);
-  const c=cmd(raw);
-  if(c){add("b",c.t,c.url);speak(c.t);return}
-  add("b","O‘ylayapman…");const el=log.lastElementChild;
-  const a=await ask(raw);el.textContent=a;log.scrollTop=log.scrollHeight;speak(a);
+  const el=add("b","…");
+  let c=null;
+  try{c=await cmd(raw)}catch(e){c={t:"Не получилось выполнить команду. Проверьте интернет и попробуйте ещё раз."}}
+  if(!c)c={t:await ask(raw)};
+  fill(el,c.t,c.url);speak(c.t);
 }
 
 $("#f").onsubmit=e=>{e.preventDefault();const i=$("#q"),v=i.value;i.value="";send(v)};
@@ -186,14 +241,16 @@ const SR=window.SpeechRecognition||window.webkitSpeechRecognition,mic=$("#mic");
 if(SR)mic.onclick=()=>{const r=new SR();r.lang="uz-UZ";r.onresult=e=>send(e.results[0][0].transcript);r.onend=r.onerror=()=>mic.classList.remove("on");mic.classList.add("on");try{r.start()}catch(e){}};
 else mic.hidden=true;
 
-$("#nm").value=who;
-$("#nm").onkeydown=e=>{if(e.key==="Enter")$("#go").click()};
+const nmI=$("#nm");
+if(who){$("#ot").textContent="Qaytganingiz bilan, "+who+"!";$("#os").hidden=true;nmI.hidden=true;$("#ch").hidden=false}
+$("#ch").onclick=e=>{e.preventDefault();$("#ot").textContent="Assalomu alaykum!";$("#os").hidden=false;nmI.hidden=false;nmI.value=who;nmI.focus();e.currentTarget.hidden=true};
+nmI.onkeydown=e=>{if(e.key==="Enter")$("#go").click()};
 $("#go").onclick=()=>{
-  const v=$("#nm").value.trim();if(v){who=v;save()}
+  const v=nmI.value.trim();if(v&&!nmI.hidden){who=v;save()}
   $("#ov").hidden=true;
   av.classList.add("wave");setTimeout(()=>av.classList.remove("wave"),2700);
-  const h=new Date().getHours(),g=h<11?"Xayrli tong":h<18?"Xayrli kun":"Xayrli kech";
-  const t="Assalomu alaykum, "+(who||"do‘stim")+"! "+g+"! Men sizning yordamchingizman. Savol bering, musiqa qo‘yaman yoki ilovalarni ochaman.";
+  const h=new Date().getHours(),g=h<11?"Доброе утро":h<18?"Добрый день":"Добрый вечер";
+  const t="Здравствуйте, "+rn()+"! "+g+"! Я ваш помощник. Задавайте вопросы, а я включу музыку, подскажу погоду и курс валют, поставлю таймер и покажу видео или карту прямо здесь.";
   add("b",t);speak(t);
 };
 })();
